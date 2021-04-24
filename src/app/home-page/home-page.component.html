@@ -6,62 +6,77 @@
 <!--</div>-->
 <!--</form>-->
 
+<form class="container-div-padding" [formGroup]="placeOrderService.printDetails" (change)="initUploadConfig()">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-8">
+
+        <div class="row">
+          <div class="col-md-2">
+            <label>print type</label>
+          </div>
+          <div class="col-md-10">
+            <!--<mat-radio-group aria-label="Select an option" (change)="selectPaperColor($event)">-->
+            <mat-radio-group aria-label="Select an option" formControlName="printType">
+              <mat-radio-button value="black_and_white" [checked]="true">Black & White</mat-radio-button>
+              <mat-radio-button value="color">Color</mat-radio-button>
+            </mat-radio-group>
+          </div>
+          <div class="col-md-2">
+            <label>print type per paper</label>
+          </div>
+          <div class="col-md-10">
+            <!--<mat-radio-group aria-label="Select an option" (change)="selectPaperSide($event)">-->
+            <mat-radio-group aria-label="Select an option"formControlName="singleDoubleSide" >
+              <mat-radio-button value="single_side" [checked]="true">single side</mat-radio-button>
+              <mat-radio-button value="double_side">double side</mat-radio-button>
+            </mat-radio-group>
+          </div>
+          <div class="col-md-2"><label>number of copies</label>
+          </div>
+          <div class="col-md-10">
+            <input type="number" matInput formControlName="numberOfCopies">
+          </div>
+
+          <div class="col-md-2"><label> page size</label>
+          </div>
+          <div class="col-md-10">
+            <mat-form-field appearance="outline" >
+              <mat-label>Choose an option</mat-label>
+              <mat-select formControlName="pageSize">
+                <mat-option value="Letter">Letter</mat-option>
+                <mat-option value="Executive">Executive</mat-option>
+                <mat-option value="Legal">Legal</mat-option>
+                <mat-option value="Statement">Statement</mat-option>
+                <mat-option value="Tabloid">Tabloid</mat-option>
+                <mat-option value="A3"> A3</mat-option>
+                <mat-option value="A4"> A4</mat-option>
+                <mat-option value="A5"> A5</mat-option>
+                <mat-option value="B4">B4</mat-option>
+                <mat-option value="B5">B5</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
 
 
-<div class="container">
-  <div class="row">
-    <div class="col-md-2">
-      <label>print type</label>
-    </div>
-    <div class="col-md-10">
-      <mat-radio-group aria-label="Select an option">
-        <mat-radio-button value="black_and_white" [checked]="true">Black & White</mat-radio-button>
-        <mat-radio-button value="color">Color</mat-radio-button>
-      </mat-radio-group>
-    </div>
-    <div class="col-md-2">
-      <label>print type per paper</label>
-    </div>
-    <div class="col-md-10">
-      <mat-radio-group aria-label="Select an option">
-        <mat-radio-button value="single_side" [checked]="true">single side</mat-radio-button>
-        <mat-radio-button value="double_side">double side</mat-radio-button>
-      </mat-radio-group>
-    </div>
-    <div class="col-md-2"><label>number of copies</label>
-    </div>
-    <div class="col-md-10">
-      <input type="number" matInput placeholder="1">
-    </div>
+        </div>
 
-    <div class="col-md-2"><label> page size</label>
-    </div>
-    <div class="col-md-10">
-      <mat-form-field appearance="outline">
-        <mat-label>Choose an option</mat-label>
-        <mat-select>
-          <mat-option value="Letter">Letter</mat-option>
-          <mat-option value="Executive">Executive</mat-option>
-          <mat-option value="Legal">Legal</mat-option>
-          <mat-option value="Statement">Statement</mat-option>
-          <mat-option value="Tabloid">Tabloid</mat-option>
-          <mat-option value="A3"> A3</mat-option>
-          <mat-option value="A4"> A4</mat-option>
-          <mat-option value="A5"> A5</mat-option>
-          <mat-option value="B4">B4</mat-option>
-          <mat-option value="B5">B5</mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
+        <angular-file-uploader
+          [config]="afuConfig"
+          (ApiResponse)="DocUpload($event)"
+        >
+        </angular-file-uploader>
+      </div>
 
-
+      <div class="col-md-4" *ngIf="payPalComponentShow">
+        <div>
+          <label  >Total amount {{this.placeOrderService.printDetails.value.totalAmount}}
+            {{this.placeOrderService.printDetails.value.currencyCode}}</label>
+          <ngx-paypal [config]="payPalConfig"></ngx-paypal>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
 
-<angular-file-uploader
-  [config]="afuConfig"
-  (ApiResponse)="DocUpload($event)"
->
-</angular-file-uploader>
-
-
+  <!--<button (click)="testAbc()">click</button>-->
+</form>

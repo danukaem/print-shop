@@ -9,6 +9,9 @@ import {FormsModule} from '@angular/forms';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {AngularModule} from './angular.modules';
 import { AngularFileUploaderModule } from 'angular-file-uploader';
+import { NgxPayPalModule } from 'ngx-paypal';
+import { ReactiveFormsModule } from '@angular/forms';
+
 
 @NgModule({
   declarations: [
@@ -22,7 +25,9 @@ import { AngularFileUploaderModule } from 'angular-file-uploader';
     FormsModule,
     BrowserAnimationsModule,
     AngularModule,
-    AngularFileUploaderModule
+    AngularFileUploaderModule,
+    NgxPayPalModule,
+    ReactiveFormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]
