@@ -17,12 +17,104 @@ export class HomePageComponent implements OnInit {
   shippingCost = 100;
 
   paperCost = 0;
+  fileUploaderShow = true;
+
+  constructor(private http: HttpClient, public placeOrderService: PlaceOrderService) {
+  }
+
+  ngOnInit(): void {
+    this.initPaypalConfig();
+    this.initUploadConfig();
+  }
+
+  DocUpload(event: any): void {
+    // this.payPalComponentShow = event.status === 200;
+
+    if (event.status === 200) {
+      this.payPalComponentShow = true;
+    } else {
+      this.payPalComponentShow = false;
+    }
+    this.fileUploaderShow = false;
+  }
+
+  private initPaypalConfig(): void {
+    const iCreateOrder: ICreateOrderRequest = {
+      intent: 'CAPTURE',
+      purchase_units: [{
+        amount: {
+          currency_code: this.placeOrderService.printDetails.value.currencyCode,
+          value: this.placeOrderService.printDetails.value.totalAmount,
+          breakdown: {
+            item_total: {
+              currency_code: this.placeOrderService.printDetails.value.currencyCode,
+              value: this.placeOrderService.printDetails.value.totalAmount
+            }
+          }
+        },
+        items: [{
+          name: 'Enterprise Subscription',
+          quantity: '1',
+          category: 'DIGITAL_GOODS',
+          unit_amount: {
+            currency_code: this.placeOrderService.printDetails.value.currencyCode,
+            value: this.placeOrderService.printDetails.value.totalAmount,
+          },
+        }]
+      }]
+    };
+
+    this.payPalConfig = {
+      currency: this.placeOrderService.printDetails.value.currencyCode,
+      clientId: 'sb',
+
+
+      createOrderOnClient: (data: any) => iCreateOrder,
+
+
+      advanced: {
+        commit: 'true'
+      },
+      style: {
+        label: 'paypal',
+        layout: 'vertical'
+      },
+      onApprove: (data, actions) => {
+        console.log('onApprove - transaction was approved, but not authorized', data, actions);
+        actions.order.get().then((details: any) => {
+          console.log('onApprove - you can get full order details inside onApprove: ', details);
+          this.savePayerDetails(details.payer);
+
+        });
+
+      },
+      onClientAuthorization: (data) => {
+        console.log('onClientAuthorization - you should probably inform your server about completed transaction at this point', data);
+        // this.showSuccess = true;
+      },
+      onCancel: (data, actions) => {
+        console.log('OnCancel', data, actions);
+        // this.showCancel = true;
+        location.reload();
+      },
+      onError: err => {
+        console.log('OnError', err);
+        // this.showError = true;
+        location.reload();
+
+      },
+      onClick: (data, actions) => {
+        console.log('onClick', data, actions);
+        // this.resetStatus();
+      },
+    };
+  }
 
   initUploadConfig(): void {
     this.afuConfig = {
       multiple: true,
       // formatsAllowed: '.jpg,.png,.pdf,.docx',
-      maxSize: 1,
+      maxSize: 10,
       uploadAPI: {
         url: 'http://localhost:8080/document/uploadFile',
         params: {
@@ -44,21 +136,22 @@ export class HomePageComponent implements OnInit {
     };
 
     this.placeOrderService.printDetails.value.totalAmount = this.priceCalculation().toString();
-    this.initConfig();
+    this.initPaypalConfig();
 
   }
 
-  constructor(private http: HttpClient, public placeOrderService: PlaceOrderService) {
-  }
 
-  ngOnInit(): void {
-    this.initConfig();
-    this.initUploadConfig();
-  }
-
-
-  DocUpload(event: any): void {
-    this.payPalComponentShow = event.status === 200;
+  savePayerDetails(payerDetails: any): void {
+    const headers = new HttpHeaders(({Authorization: 'Basic ' + btoa('user' + ':' + 'password')}));
+    this.http.post<any>('http://localhost:8080/document/savePayerDetails', payerDetails, {
+      observe: 'response',
+      headers
+    }).subscribe(response => {
+      alert('Item added successfully');
+    }, error => {
+      console.log(error);
+      alert('error');
+    });
   }
 
   priceCalculation(): number {
@@ -227,88 +320,6 @@ export class HomePageComponent implements OnInit {
     }
     return this.paperCost + this.shippingCost;
   }
-
-  private initConfig(): void {
-
-    const iCreateOrder: ICreateOrderRequest = {
-      intent: 'CAPTURE',
-      purchase_units: [{
-        amount: {
-          currency_code: this.placeOrderService.printDetails.value.currencyCode,
-          value: this.placeOrderService.printDetails.value.totalAmount,
-          breakdown: {
-            item_total: {
-              currency_code: this.placeOrderService.printDetails.value.currencyCode,
-              value: this.placeOrderService.printDetails.value.totalAmount
-            }
-          }
-        },
-        items: [{
-          name: 'Enterprise Subscription',
-          quantity: '1',
-          category: 'DIGITAL_GOODS',
-          unit_amount: {
-            currency_code: this.placeOrderService.printDetails.value.currencyCode,
-            value: this.placeOrderService.printDetails.value.totalAmount,
-          },
-        }]
-      }]
-    };
-    this.payPalConfig = {
-      currency: this.placeOrderService.printDetails.value.currencyCode,
-      clientId: 'sb',
-
-
-      createOrderOnClient: (data: any) => iCreateOrder,
-
-
-      advanced: {
-        commit: 'true'
-      },
-      style: {
-        label: 'paypal',
-        layout: 'vertical'
-      },
-      onApprove: (data, actions) => {
-        console.log('onApprove - transaction was approved, but not authorized', data, actions);
-        actions.order.get().then((details: any) => {
-          console.log('onApprove - you can get full order details inside onApprove: ', details);
-        });
-
-      },
-      onClientAuthorization: (data) => {
-        console.log('onClientAuthorization - you should probably inform your server about completed transaction at this point', data);
-        // this.showSuccess = true;
-      },
-      onCancel: (data, actions) => {
-        console.log('OnCancel', data, actions);
-        // this.showCancel = true;
-
-      },
-      onError: err => {
-        console.log('OnError', err);
-        // this.showError = true;
-      },
-      onClick: (data, actions) => {
-        console.log('onClick', data, actions);
-        // this.resetStatus();
-      },
-    };
-  }
-
-  selectPaperColor(event: any): void {
-    // this.placeOrderService.setPrintType(event.value);
-    // this.afuConfig.uploadAPI.params.printType = this.placeOrderService.getPrintType();
-
-  }
-
-
-  selectPaperSide(event: any): void {
-    // this.placeOrderService.setPrintSide(event.value);
-    // this.afuConfig.uploadAPI.params.singleDoubleSide = this.placeOrderService.getPrintSide();
-
-  }
-
 
   testAbc(): void {
     console.log('------------------------------------------------');

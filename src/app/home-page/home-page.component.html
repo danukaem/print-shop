@@ -9,7 +9,7 @@
 <form class="container-div-padding" [formGroup]="placeOrderService.printDetails" (change)="initUploadConfig()">
   <div class="container-fluid">
     <div class="row">
-      <div class="col-md-8">
+      <div class="col-md-8" *ngIf="!payPalComponentShow">
 
         <div class="row">
           <div class="col-md-2">
@@ -27,7 +27,7 @@
           </div>
           <div class="col-md-10">
             <!--<mat-radio-group aria-label="Select an option" (change)="selectPaperSide($event)">-->
-            <mat-radio-group aria-label="Select an option"formControlName="singleDoubleSide" >
+            <mat-radio-group aria-label="Select an option" formControlName="singleDoubleSide">
               <mat-radio-button value="single_side" [checked]="true">single side</mat-radio-button>
               <mat-radio-button value="double_side">double side</mat-radio-button>
             </mat-radio-group>
@@ -41,7 +41,7 @@
           <div class="col-md-2"><label> page size</label>
           </div>
           <div class="col-md-10">
-            <mat-form-field appearance="outline" >
+            <mat-form-field appearance="outline">
               <mat-label>Choose an option</mat-label>
               <mat-select formControlName="pageSize">
                 <mat-option value="Letter">Letter</mat-option>
@@ -61,16 +61,20 @@
 
         </div>
 
-        <angular-file-uploader
-          [config]="afuConfig"
-          (ApiResponse)="DocUpload($event)"
-        >
-        </angular-file-uploader>
+        <div *ngIf="fileUploaderShow">
+
+          <angular-file-uploader
+            [config]="afuConfig"
+            (ApiResponse)="DocUpload($event)"
+          >
+          </angular-file-uploader>
+        </div>
       </div>
 
-      <div class="col-md-4" *ngIf="payPalComponentShow">
+      <!--<div class="col-md-4" *ngIf="payPalComponentShow">-->
+      <div class="col-md-4"  >
         <div>
-          <label  >Total amount {{this.placeOrderService.printDetails.value.totalAmount}}
+          <label>Total amount {{this.placeOrderService.printDetails.value.totalAmount}}
             {{this.placeOrderService.printDetails.value.currencyCode}}</label>
           <ngx-paypal [config]="payPalConfig"></ngx-paypal>
         </div>
